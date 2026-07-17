@@ -1,141 +1,104 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { createProduct, toggleProductStatus } from './actions'
-import { Plus, Search, Tag, DollarSign, PackageOpen } from 'lucide-react'
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Search, Plus, Coffee, Pizza, CakeSlice, Edit2, Trash2 } from 'lucide-react';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function MenuClient({ initialProducts }: { initialProducts: any[] }) {
-  const [isAdding, setIsAdding] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
+export default function MenuClient({ products = [] }: { products?: any[] }) {
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('Todos');
 
-  const filteredProducts = initialProducts.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const categories = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
 
-  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    await createProduct(formData)
-    setIsAdding(false)
-  }
+  const filtered = products.filter(item => {
+    const matchCat = filter === 'Todos' || item.category === filter;
+    const matchSearch = item.name?.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 p-6">
-      <header className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Catálogo / Menú</h1>
-          <p className="text-slate-500 text-sm">Gestiona los productos disponibles en el Punto de Venta</p>
+    <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#F8FAFC] dark:bg-background h-full">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-4">
+            <div className="bg-primary/10 p-3 rounded-2xl">
+              <Pizza className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">Menú y Precios</h1>
+              <p className="text-slate-500 font-medium mt-1">Gestión del catálogo de platillos y bebidas.</p>
+            </div>
+          </div>
+          <Button className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-primary/20">
+            <Plus className="w-5 h-5 mr-2" /> Nuevo Producto
+          </Button>
         </div>
-        <button 
-          onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-md hover:bg-slate-800"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nuevo Producto</span>
-        </button>
-      </header>
 
-      {isAdding && (
-        <div className="bg-white p-6 rounded-lg shadow border border-slate-200 mb-6">
-          <h2 className="text-lg font-bold mb-4">Agregar Nuevo Producto</h2>
-          <form onSubmit={handleAdd} className="flex gap-4 items-end">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
-              <input name="name" required className="w-full border rounded px-3 py-2" placeholder="Ej. Frappe Moka" />
-            </div>
-            <div className="w-48">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-              <input name="category" required className="w-full border rounded px-3 py-2" placeholder="Ej. Bebidas Frías" />
-            </div>
-            <div className="w-32">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Precio</label>
-              <input name="price" type="number" step="0.01" required className="w-full border rounded px-3 py-2" placeholder="0.00" />
-            </div>
-            <button type="submit" className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 h-[42px]">
-              Guardar
-            </button>
-          </form>
-        </div>
-      )}
-
-      <div className="flex-1 bg-white rounded-lg shadow border border-slate-200 flex flex-col overflow-hidden">
-        <div className="p-4 border-b bg-slate-50/50">
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between shrink-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 w-full sm:w-auto scrollbar-hide">
+            {categories.map(cat => (
+              <Button 
+                key={String(cat)} 
+                variant={filter === cat ? "default" : "outline"}
+                className={`rounded-full px-6 transition-all shadow-sm ${filter === cat ? 'shadow-primary/25' : 'bg-white hover:bg-slate-50'}`}
+                onClick={() => setFilter(String(cat))}
+              >
+                {String(cat)}
+              </Button>
+            ))}
+          </div>
+          <div className="relative w-full sm:w-72 shrink-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input 
               placeholder="Buscar producto..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm"
+              className="pl-11 h-12 rounded-2xl bg-white shadow-sm border-slate-200 focus-visible:ring-primary text-base"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 sticky top-0 border-b">
-              <tr>
-                <th className="px-6 py-3 text-sm font-semibold text-slate-600">Producto</th>
-                <th className="px-6 py-3 text-sm font-semibold text-slate-600">Categoría</th>
-                <th className="px-6 py-3 text-sm font-semibold text-slate-600">Precio</th>
-                <th className="px-6 py-3 text-sm font-semibold text-slate-600">Estado</th>
-                <th className="px-6 py-3 text-sm font-semibold text-slate-600 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredProducts.map(p => (
-                <tr key={p.id} className="hover:bg-slate-50/50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-slate-100 p-2 rounded text-slate-500">
-                        <PackageOpen className="w-5 h-5" />
-                      </div>
-                      <span className="font-medium text-slate-900">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <Tag className="w-4 h-4 text-slate-400" />
-                      {p.category}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    <div className="flex items-center text-slate-700">
-                      <DollarSign className="w-4 h-4 text-slate-400" />
-                      {p.price}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
-                      p.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                    }`}>
-                      {p.is_active ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => toggleProductStatus(p.id, p.is_active)}
-                      className={`text-sm font-medium ${p.is_active ? 'text-red-600 hover:text-red-800' : 'text-emerald-600 hover:text-emerald-800'}`}
-                    >
-                      {p.is_active ? 'Desactivar' : 'Activar'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredProducts.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
-                    No se encontraron productos
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filtered.map((item, idx) => (
+             <Card key={item.id} className="border-none shadow-xl shadow-slate-200/40 rounded-3xl overflow-hidden bg-white group hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${idx * 50}ms`, animation: 'fadeIn 0.5s ease-out forwards' }}>
+                <div className="h-32 bg-slate-50 flex items-center justify-center relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                  {String(item.category).includes('Bebida') ? <Coffee className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" /> :
+                   String(item.category).includes('Postre') ? <CakeSlice className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" /> :
+                   <Pizza className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" />}
+                   
+                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-700 hover:text-primary shadow-sm"><Edit2 className="w-4 h-4"/></Button>
+                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-700 hover:text-destructive shadow-sm"><Trash2 className="w-4 h-4"/></Button>
+                   </div>
+                </div>
+                <CardContent className="p-5">
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <h3 className="font-bold text-lg text-slate-800 line-clamp-1">{item.name}</h3>
+                    <Badge variant="default" className="font-mono bg-primary text-primary-foreground font-bold shrink-0 shadow-sm">${item.price}</Badge>
+                  </div>
+                  <p className="text-sm text-slate-500 font-medium mb-4">{item.category}</p>
+                  
+                  <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
+                    <Badge variant={item.is_active ? 'secondary' : 'outline'} className={item.is_active ? 'bg-green-100 text-green-700' : 'text-slate-400'}>
+                      {item.is_active ? 'Activo' : 'Inactivo'}
+                    </Badge>
+                  </div>
+                </CardContent>
+             </Card>
+          ))}
         </div>
       </div>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}} />
     </div>
-  )
+  );
 }
