@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Plus, Minus, Trash2, Search, Coffee, Pizza, CakeSlice, CheckCircle2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-// Mock data fallback if DB fails
 const MOCK_CATEGORIES = ['Todos', 'Bebidas', 'Alimentos', 'Postres', 'Extras'];
 const MOCK_PRODUCTS = [
   { id: '1', name: 'Latte Vainilla', price: 65, category: 'Bebidas', icon: <Coffee className="w-8 h-8 mb-2" /> },
@@ -18,18 +17,18 @@ const MOCK_PRODUCTS = [
   { id: '6', name: 'Cheesecake', price: 85, category: 'Postres', icon: <CakeSlice className="w-8 h-8 mb-2" /> },
 ];
 
-export default function POSClient({ products = [] }: { products?: any[] }) {
+export default function POSClient({ products = [] }: { products?: Record<string, unknown>[] }) {
   const displayProducts = products.length > 0 ? products : MOCK_PRODUCTS;
   
-  const [cart, setCart] = useState<any[]>([]);
+  const [cart, setCart] = useState<Record<string, unknown>[]>([]);
   const [filter, setFilter] = useState('Todos');
   const [search, setSearch] = useState('');
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: Record<string, unknown>) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.id === product.id ? { ...item, quantity: Number(item.quantity) + 1 } : item);
       }
       return [...prev, { ...product, quantity: 1 }];
     });
@@ -38,22 +37,18 @@ export default function POSClient({ products = [] }: { products?: any[] }) {
   const updateQuantity = (id: string, delta: number) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
-        const newQ = item.quantity + delta;
+        const newQ = Number(item.quantity) + delta;
         return newQ > 0 ? { ...item, quantity: newQ } : item;
       }
       return item;
     }));
   };
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(item => item.id !== id));
-  };
-
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
 
   const filteredProducts = displayProducts.filter(p => {
     const matchCat = filter === 'Todos' || p.category === filter;
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = String(p.name).toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 
@@ -89,14 +84,14 @@ export default function POSClient({ products = [] }: { products?: any[] }) {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredProducts.map(product => (
               <Card 
-                key={product.id} 
+                key={String(product.id)} 
                 className="cursor-pointer hover:shadow-md transition-all hover:border-primary/50 group overflow-hidden"
                 onClick={() => addToCart(product)}
               >
                 <CardContent className="p-4 flex flex-col items-center justify-center text-center aspect-square">
-                  {product.icon || <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3"><ShoppingCart className="w-6 h-6"/></div>}
-                  <h3 className="font-semibold text-sm line-clamp-2 leading-tight">{product.name}</h3>
-                  <Badge variant="secondary" className="mt-2 font-mono">${product.price}</Badge>
+                  {product.icon ? (product.icon as React.ReactNode) : <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3"><ShoppingCart className="w-6 h-6"/></div>}
+                  <h3 className="font-semibold text-sm line-clamp-2 leading-tight mt-1">{String(product.name)}</h3>
+                  <Badge variant="secondary" className="mt-2 font-mono">${Number(product.price)}</Badge>
                 </CardContent>
               </Card>
             ))}
@@ -129,19 +124,19 @@ export default function POSClient({ products = [] }: { products?: any[] }) {
             </div>
           ) : (
             cart.map(item => (
-              <div key={item.id} className="flex flex-col gap-2 p-3 bg-background border rounded-xl shadow-sm">
+              <div key={String(item.id)} className="flex flex-col gap-2 p-3 bg-background border rounded-xl shadow-sm">
                 <div className="flex justify-between font-medium">
-                  <span className="line-clamp-1 pr-2">{item.name}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="line-clamp-1 pr-2">{String(item.name)}</span>
+                  <span>${(Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">${item.price} c/u</span>
+                  <span className="text-xs text-muted-foreground">${Number(item.price)} c/u</span>
                   <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md" onClick={() => updateQuantity(item.id, -1)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md" onClick={() => updateQuantity(String(item.id), -1)}>
                       <Minus className="w-3 h-3" />
                     </Button>
-                    <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md" onClick={() => updateQuantity(item.id, 1)}>
+                    <span className="w-8 text-center font-semibold text-sm">{String(item.quantity)}</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md" onClick={() => updateQuantity(String(item.id), 1)}>
                       <Plus className="w-3 h-3" />
                     </Button>
                   </div>
@@ -161,7 +156,7 @@ export default function POSClient({ products = [] }: { products?: any[] }) {
               <span>IVA (16%)</span>
               <span>${(total * 0.16).toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-xl font-bold pt-2 border-t">
+            <div className="flex justify-between text-xl font-bold pt-2 border-t text-foreground">
               <span>Total</span>
               <span className="text-primary">${total.toFixed(2)}</span>
             </div>
@@ -179,3 +174,4 @@ export default function POSClient({ products = [] }: { products?: any[] }) {
     </div>
   );
 }
+export { POSClient };

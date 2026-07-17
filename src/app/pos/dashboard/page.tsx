@@ -1,5 +1,5 @@
 import { getDashboardMetrics } from '../actions'
-import { DashboardClient } from './dashboard-client'
+import DashboardClient  from './dashboard-client'
 
 export const dynamic = 'force-dynamic'
 

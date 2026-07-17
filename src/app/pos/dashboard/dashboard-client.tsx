@@ -1,9 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Users, DollarSign, Receipt, TrendingUp, Clock, AlertCircle } from "lucide-react"
+import { Users, DollarSign, Receipt, TrendingUp, AlertCircle } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
-import { Badge } from "@/components/ui/badge"
 
 const salesData = [
   { time: '08:00', sales: 1200 },
@@ -24,7 +23,7 @@ const topProducts = [
   { name: 'Croissant', qty: 65 },
 ]
 
-export default function DashboardClient({ metrics }: { metrics: any }) {
+export default function DashboardClient({ metrics }: { metrics?: Record<string, unknown> | null }) {
   const displayMetrics = metrics || {
     totalSales: 24650.00,
     totalOrders: 156,
@@ -47,7 +46,7 @@ export default function DashboardClient({ metrics }: { metrics: any }) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">${displayMetrics.totalSales.toLocaleString()}</div>
+            <div className="text-3xl font-bold">${Number(displayMetrics.totalSales || 0).toLocaleString()}</div>
             <p className="text-xs text-green-600 font-medium flex items-center mt-1">
               <TrendingUp className="w-3 h-3 mr-1" /> +12.5% vs ayer
             </p>
@@ -61,7 +60,7 @@ export default function DashboardClient({ metrics }: { metrics: any }) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{displayMetrics.totalOrders}</div>
+            <div className="text-3xl font-bold">{Number(displayMetrics.totalOrders || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">
               24 activas en este momento
             </p>
@@ -75,7 +74,7 @@ export default function DashboardClient({ metrics }: { metrics: any }) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">${displayMetrics.avgTicket.toFixed(2)}</div>
+            <div className="text-3xl font-bold">${Number(displayMetrics.avgTicket || 0).toFixed(2)}</div>
             <p className="text-xs text-muted-foreground mt-1">
               +5% vs semana pasada
             </p>

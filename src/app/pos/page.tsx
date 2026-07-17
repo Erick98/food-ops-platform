@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic"
-import { POSClient } from './pos-client'
+import POSClient  from './pos-client'
 import { getProducts } from './actions'
 import { getTables } from './tables/actions'
 
