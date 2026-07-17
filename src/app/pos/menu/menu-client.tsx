@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from 'react';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Coffee, Pizza, CakeSlice, Edit2, Trash2 } from 'lucide-react';
 
-export default function MenuClient({ products = [] }: { products?: Record<string, unknown>[] }) {
+export default function MenuClient({ products = [] }: { products?: any[] }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Todos');
 

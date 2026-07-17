@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from 'react';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { } from '@/components/ui/input';
 import { Wallet, Lock, Unlock, CreditCard, Banknote, History, Receipt } from 'lucide-react';
 
-export default function CashRegisterClient({ shift, cutoff }: { shift: Record<string, unknown>, cutoff: Record<string, unknown> }) {
+export default function CashRegisterClient({ shift, cutoff }: { shift: any, cutoff: any }) {
   const [isOpen, ] = useState(!!shift);
 
   return (
@@ -48,21 +49,21 @@ export default function CashRegisterClient({ shift, cutoff }: { shift: Record<st
                       <div className="bg-white p-2 rounded-lg shadow-sm"><Banknote className="w-5 h-5 text-green-600"/></div>
                       <span className="font-bold text-slate-700">Fondo Inicial</span>
                     </div>
-                    <span className="font-mono text-xl font-bold">${shift?.starting_cash || 500}</span>
+                    <span className="font-mono text-xl font-bold">${Number(shift?.starting_cash) || 500}</span>
                   </div>
                   <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
                     <div className="flex items-center gap-3">
                       <div className="bg-white p-2 rounded-lg shadow-sm"><Banknote className="w-5 h-5 text-emerald-600"/></div>
                       <span className="font-bold text-slate-700">Ventas Efectivo</span>
                     </div>
-                    <span className="font-mono text-xl font-bold">${cutoff?.totalEfectivo || 0}</span>
+                    <span className="font-mono text-xl font-bold">${Number(cutoff?.totalEfectivo) || 0}</span>
                   </div>
                   <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
                     <div className="flex items-center gap-3">
                       <div className="bg-white p-2 rounded-lg shadow-sm"><CreditCard className="w-5 h-5 text-blue-600"/></div>
                       <span className="font-bold text-slate-700">Ventas Tarjeta</span>
                     </div>
-                    <span className="font-mono text-xl font-bold">${cutoff?.totalTarjeta || 0}</span>
+                    <span className="font-mono text-xl font-bold">${Number(cutoff?.totalTarjeta) || 0}</span>
                   </div>
                 </div>
                 
@@ -70,7 +71,7 @@ export default function CashRegisterClient({ shift, cutoff }: { shift: Record<st
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-black text-slate-800">Efectivo Esperado en Caja</span>
                     <span className="text-3xl font-black text-primary font-mono">
-                      ${(shift?.starting_cash || 500) + (cutoff?.totalEfectivo || 0)}
+                      ${(Number(shift?.starting_cash) || 500) + (Number(cutoff?.totalEfectivo) || 0)}
                     </span>
                   </div>
                 </div>

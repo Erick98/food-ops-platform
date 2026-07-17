@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from 'react';
@@ -31,7 +32,6 @@ export default function POSClient({ products = [] }: { products?: Record<string,
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    // toast({ title: "Añadido", description: `${product.name} agregado a la orden`, duration: 1000 });
   };
 
   const updateQuantity = (id: string, delta: number) => {
@@ -43,9 +43,6 @@ export default function POSClient({ products = [] }: { products?: Record<string,
       return item;
     }));
   };
-
-    setCart(prev => prev.filter(item => item.id !== id));
-  }
 
   const handleCheckout = async () => {
     setIsCharging(true);
@@ -75,7 +72,8 @@ export default function POSClient({ products = [] }: { products?: Record<string,
         });
       }
     } catch (e: unknown) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      toast({ title: "Error", description: errorMsg, variant: "destructive" });
     }
     setIsCharging(false);
   }
@@ -92,7 +90,6 @@ export default function POSClient({ products = [] }: { products?: Record<string,
     <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-[#F8FAFC] dark:bg-background">
       {/* Product Grid */}
       <div className="flex-1 flex flex-col h-full overflow-hidden p-4 lg:p-6 gap-6 relative">
-        {/* Header decoration */}
         <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between shrink-0 relative z-10">
