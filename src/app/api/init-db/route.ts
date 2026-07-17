@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 export async function GET() {
-  const connectionString = "postgresql://postgres:BernavFood2026_Secure!@db.lxqbpdbivhmdztoivclw.supabase.co:5432/postgres";
+  const connectionString = "postgresql://postgres.lxqbpdbivhmdztoivclw:BernavFood2026_Secure!@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
   const client = new Client({
     connectionString,
     ssl: { rejectUnauthorized: false }
