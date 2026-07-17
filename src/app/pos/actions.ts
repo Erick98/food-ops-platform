@@ -3,7 +3,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { DashboardMetrics } from './dashboard/dashboard-client'
+
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const mockProducts = [
