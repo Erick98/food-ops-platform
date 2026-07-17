@@ -17,7 +17,7 @@ const MOCK_PRODUCTS = [
   { id: '6', name: 'Cheesecake', price: 85, category: 'Postres', icon: <CakeSlice className="w-8 h-8 mb-2" /> },
 ];
 
-export default function POSClient({ products = [] }: { products?: Record<string, unknown>[] }) {
+export default function POSClient({ products = [], tables = [] }: { products?: Record<string, unknown>[], tables?: any[] }) {
   const displayProducts = products.length > 0 ? products : MOCK_PRODUCTS;
   
   const [cart, setCart] = useState<Record<string, unknown>[]>([]);
