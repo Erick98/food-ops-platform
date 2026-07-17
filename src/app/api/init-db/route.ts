@@ -21,7 +21,8 @@ export async function GET() {
     await client.end();
     
     return NextResponse.json({ success: true, message: "Schema applied successfully" });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
