@@ -150,7 +150,7 @@ export async function createStaff(staffData: any) {
 }
 
 // ─── DASHBOARD METRICS ────────────────────────────────────────────────────────
-export async function getDashboardMetrics(): Promise<{ data: DashboardMetrics }> {
+export async function getDashboardMetrics(): Promise<{ data: any }> {
   try {
     const supabase = createClient()
     const today = isoToday()
