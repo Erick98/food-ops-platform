@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Plus, Minus, Trash2, Search, Coffee, Pizza, CakeSlice, CheckCircle2, CreditCard, Banknote, Utensils } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, Coffee, CakeSlice, CreditCard, Banknote, Utensils } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast";
 import { createOrder } from './actions';
@@ -44,7 +44,6 @@ export default function POSClient({ products = [] }: { products?: Record<string,
     }));
   };
 
-  const removeFromCart = (id: string) => {
     setCart(prev => prev.filter(item => item.id !== id));
   }
 
@@ -75,7 +74,7 @@ export default function POSClient({ products = [] }: { products?: Record<string,
           variant: "destructive",
         });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     }
     setIsCharging(false);

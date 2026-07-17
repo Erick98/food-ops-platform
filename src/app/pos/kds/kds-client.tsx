@@ -9,7 +9,7 @@ import { Clock, CheckCircle2, ChefHat, Play } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from 'next/navigation';
 
-export default function KDSClient({ orders = [] }: { orders?: any[] }) {
+export default function KDSClient({ orders = [] }: { orders?: Record<string, unknown>[] }) {
   const { toast } = useToast();
   const router = useRouter();
   const [activeOrders, setActiveOrders] = useState(orders);
@@ -115,7 +115,7 @@ export default function KDSClient({ orders = [] }: { orders?: any[] }) {
                   </CardHeader>
                   <CardContent className="flex-1 overflow-y-auto p-0 scrollbar-hide">
                     <ul className="divide-y divide-slate-700/50">
-                      {(order.order_items || []).map((item: any, i: number) => {
+                      {(order.order_items || []).map((item: Record<string, unknown>, i: number) => {
                         const productName = Array.isArray(item.products) ? item.products[0]?.name : item.products?.name;
                         return (
                           <li key={i} className="p-4 hover:bg-white/5 transition-colors group">

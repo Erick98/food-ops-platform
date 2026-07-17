@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Coffee, Pizza, CakeSlice, Edit2, Trash2 } from 'lucide-react';
 
-export default function MenuClient({ products = [] }: { products?: any[] }) {
+export default function MenuClient({ products = [] }: { products?: Record<string, unknown>[] }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Todos');
 

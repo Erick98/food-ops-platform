@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { } from '@/components/ui/input';
 import { Wallet, Lock, Unlock, CreditCard, Banknote, History, Receipt } from 'lucide-react';
 
-export default function CashRegisterClient({ shift, cutoff }: { shift: any, cutoff: any }) {
-  const [isOpen, setIsOpen] = useState(!!shift);
+export default function CashRegisterClient({ shift, cutoff }: { shift: Record<string, unknown>, cutoff: Record<string, unknown> }) {
+  const [isOpen, ] = useState(!!shift);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#F8FAFC] dark:bg-background h-full">

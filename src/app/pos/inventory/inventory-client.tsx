@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Package, Search, Plus, AlertTriangle, ArrowUpDown } from 'lucide-react';
 
-export default function InventoryClient({ inventory = [] }: { inventory?: any[] }) {
+export default function InventoryClient({ inventory = [] }: { inventory?: Record<string, unknown>[] }) {
   const [search, setSearch] = useState('');
 
   const filtered = inventory.filter(item => 
