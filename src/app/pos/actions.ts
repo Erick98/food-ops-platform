@@ -29,7 +29,7 @@ const mockStaff = [
   { id: '3', full_name: 'María Fernández',  role: 'kitchen', email: 'maria@itocafe.com',  created_at: '2026-05-20T08:15:00Z' },
 ]
 
-const mockDashboardMetrics: DashboardMetrics = {
+const mockDashboardMetrics = {
   ventasHoy:      12450,
   ventasAyer:     11523,
   ordenesHoy:     142,
