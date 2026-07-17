@@ -41,7 +41,7 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
   const filterOrderByZone = (order: Record<string, unknown>, zone: string) => {
     if (zone === 'Todas') return true;
     const hasItemsInZone = (order.order_items as Record<string, unknown>[])?.some((item: Record<string, unknown>) => {
-      const cat = Array.isArray(item.products) ? item.products[0]?.category : item.products?.category;
+      const cat = Array.isArray(item.products) ? (item.products as Record<string, unknown>[])[0]?.category : (item.products as Record<string, unknown>)?.category;
       if (zone === 'Barra (Bebidas)' && String(cat).includes('Bebida')) return true;
       if (zone === 'Cocina Caliente' && String(cat).includes('Alimento')) return true;
       if (zone === 'Repostería' && String(cat).includes('Postre')) return true;
@@ -53,7 +53,7 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
   const getFilteredItems = (order: Record<string, unknown>, zone: string) => {
     if (zone === 'Todas') return (order.order_items as Record<string, unknown>[]) || [];
     return ((order.order_items as Record<string, unknown>[]) || []).filter((item: Record<string, unknown>) => {
-      const cat = Array.isArray(item.products) ? item.products[0]?.category : item.products?.category;
+      const cat = Array.isArray(item.products) ? (item.products as Record<string, unknown>[])[0]?.category : (item.products as Record<string, unknown>)?.category;
       if (zone === 'Barra (Bebidas)' && String(cat).includes('Bebida')) return true;
       if (zone === 'Cocina Caliente' && String(cat).includes('Alimento')) return true;
       if (zone === 'Repostería' && String(cat).includes('Postre')) return true;
