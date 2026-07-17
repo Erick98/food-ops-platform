@@ -6,14 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Package, Search, Plus, AlertTriangle, ArrowUpDown } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Package, Search, Plus, AlertTriangle, ArrowUpDown, Edit2 } from 'lucide-react';
 
 export default function InventoryClient({ inventory = [] }: { inventory?: any[] }) {
   const [search, setSearch] = useState('');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const filtered = inventory.filter(item => 
     item.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleEdit = (item: any) => {
+    setSelectedItem(item);
+    setIsEditOpen(true);
+  };
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#F8FAFC] dark:bg-background h-full">
@@ -26,10 +34,10 @@ export default function InventoryClient({ inventory = [] }: { inventory?: any[] 
             </div>
             <div>
               <h1 className="text-3xl font-black tracking-tight text-slate-900">Inventario (Insumos)</h1>
-              <p className="text-slate-500 font-medium mt-1">Gestión de materia prima, mermas y alertas de stock.</p>
+              <p className="text-slate-500 font-medium mt-1">Alimentado automáticamente por órdenes de compra y descargas de KDS.</p>
             </div>
           </div>
-          <Button className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-primary/20">
+          <Button className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-primary/20" onClick={() => handleEdit(null)}>
             <Plus className="w-5 h-5 mr-2" /> Nuevo Insumo
           </Button>
         </div>
@@ -105,7 +113,7 @@ export default function InventoryClient({ inventory = [] }: { inventory?: any[] 
                         <div className="font-bold text-slate-900">{item.name}</div>
                       </td>
                       <td className="p-4">
-                        <Badge variant="secondary" className={`font-mono text-sm px-3 py-1 ${isLow ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-slate-100 text-slate-700'}`}>
+                        <Badge variant="secondary" className={`font-mono text-sm px-3 py-1 border-none ${isLow ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-slate-100 text-slate-700'}`}>
                           {item.quantity} {item.unit}
                         </Badge>
                       </td>
@@ -120,24 +128,56 @@ export default function InventoryClient({ inventory = [] }: { inventory?: any[] 
                         ${(item.quantity * item.cost_per_unit).toFixed(2)}
                       </td>
                       <td className="p-4 text-right">
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity rounded-lg text-primary hover:bg-primary/10 font-bold">
-                          Ajustar
+                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity rounded-lg text-primary hover:bg-primary/10 font-bold" onClick={() => handleEdit(item)}>
+                          <Edit2 className="w-4 h-4 mr-1"/> Editar
                         </Button>
                       </td>
                     </tr>
                   )
                 })}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="p-12 text-center text-slate-500">
-                      No se encontraron insumos.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
         </Card>
+
+        {/* EDITOR DIALOG */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="sm:max-w-md rounded-3xl p-6">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black">{selectedItem ? 'Editar Insumo' : 'Nuevo Insumo'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 my-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Nombre del Insumo</label>
+                <Input defaultValue={selectedItem?.name} className="h-12 rounded-xl bg-slate-50" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Unidad (kg, L, pzas)</label>
+                  <Input defaultValue={selectedItem?.unit} className="h-12 rounded-xl bg-slate-50" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Costo Unitario ($)</label>
+                  <Input type="number" defaultValue={selectedItem?.cost_per_unit} className="h-12 rounded-xl bg-slate-50" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Stock Actual</label>
+                  <Input type="number" defaultValue={selectedItem?.quantity} className="h-12 rounded-xl bg-slate-50" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Mínimo (Alerta)</label>
+                  <Input type="number" defaultValue={selectedItem?.min_quantity} className="h-12 rounded-xl bg-slate-50" />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setIsEditOpen(false)} className="w-full h-12 text-lg font-bold rounded-xl shadow-lg">Guardar Insumo</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </div>
   );

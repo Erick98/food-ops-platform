@@ -6,11 +6,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Coffee, Pizza, CakeSlice, Edit2, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Plus, Coffee, Pizza, CakeSlice, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 
 export default function MenuClient({ products = [] }: { products?: any[] }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Todos');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const categories = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
 
@@ -19,6 +22,11 @@ export default function MenuClient({ products = [] }: { products?: any[] }) {
     const matchSearch = item.name?.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
+
+  const handleEdit = (prod: any) => {
+    setSelectedProduct(prod);
+    setIsEditOpen(true);
+  };
 
   return (
     <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#F8FAFC] dark:bg-background h-full">
@@ -30,12 +38,12 @@ export default function MenuClient({ products = [] }: { products?: any[] }) {
               <Pizza className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-900">Menú y Precios</h1>
-              <p className="text-slate-500 font-medium mt-1">Gestión del catálogo de platillos y bebidas.</p>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">Catálogo y Menú</h1>
+              <p className="text-slate-500 font-medium mt-1">Gestión de platillos, imágenes y precios.</p>
             </div>
           </div>
-          <Button className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-primary/20">
-            <Plus className="w-5 h-5 mr-2" /> Nuevo Producto
+          <Button className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-primary/20" onClick={() => handleEdit(null)}>
+            <Plus className="w-5 h-5 mr-2" /> Nuevo Platillo
           </Button>
         </div>
 
@@ -66,15 +74,26 @@ export default function MenuClient({ products = [] }: { products?: any[] }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filtered.map((item, idx) => (
              <Card key={item.id} className="border-none shadow-xl shadow-slate-200/40 rounded-3xl overflow-hidden bg-white group hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${idx * 50}ms`, animation: 'fadeIn 0.5s ease-out forwards' }}>
-                <div className="h-32 bg-slate-50 flex items-center justify-center relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-                  {String(item.category).includes('Bebida') ? <Coffee className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" /> :
-                   String(item.category).includes('Postre') ? <CakeSlice className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" /> :
-                   <Pizza className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" />}
+                <div className="h-40 bg-slate-100 flex items-center justify-center relative overflow-hidden">
+                  {item.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                      {String(item.category).includes('Bebida') ? <Coffee className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" /> :
+                      String(item.category).includes('Postre') ? <CakeSlice className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" /> :
+                      <Pizza className="w-12 h-12 text-slate-300 group-hover:text-primary transition-colors" />}
+                    </>
+                  )}
                    
                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-700 hover:text-primary shadow-sm"><Edit2 className="w-4 h-4"/></Button>
-                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white text-slate-700 hover:text-destructive shadow-sm"><Trash2 className="w-4 h-4"/></Button>
+                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-700 hover:text-primary shadow-sm" onClick={() => handleEdit(item)}>
+                       <Edit2 className="w-4 h-4"/>
+                     </Button>
+                     <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-700 hover:text-destructive shadow-sm">
+                       <Trash2 className="w-4 h-4"/>
+                     </Button>
                    </div>
                 </div>
                 <CardContent className="p-5">
@@ -85,7 +104,7 @@ export default function MenuClient({ products = [] }: { products?: any[] }) {
                   <p className="text-sm text-slate-500 font-medium mb-4">{item.category}</p>
                   
                   <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
-                    <Badge variant={item.is_active ? 'secondary' : 'outline'} className={item.is_active ? 'bg-green-100 text-green-700' : 'text-slate-400'}>
+                    <Badge variant={item.is_active ? 'secondary' : 'outline'} className={item.is_active ? 'bg-green-100 text-green-700 border-none' : 'text-slate-400'}>
                       {item.is_active ? 'Activo' : 'Inactivo'}
                     </Badge>
                   </div>
@@ -93,6 +112,39 @@ export default function MenuClient({ products = [] }: { products?: any[] }) {
              </Card>
           ))}
         </div>
+
+        {/* EDITOR DIALOG */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="sm:max-w-md rounded-3xl p-6">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black">{selectedProduct ? 'Editar Platillo' : 'Nuevo Platillo'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 my-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Nombre del Platillo</label>
+                <Input defaultValue={selectedProduct?.name} className="h-12 rounded-xl bg-slate-50" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Precio ($)</label>
+                  <Input type="number" defaultValue={selectedProduct?.price} className="h-12 rounded-xl bg-slate-50" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Categoría</label>
+                  <Input defaultValue={selectedProduct?.category} className="h-12 rounded-xl bg-slate-50" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 flex items-center"><ImageIcon className="w-4 h-4 mr-1"/> URL de Imagen</label>
+                <Input defaultValue={selectedProduct?.image_url} placeholder="https://ejemplo.com/foto.jpg" className="h-12 rounded-xl bg-slate-50" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setIsEditOpen(false)} className="w-full h-12 text-lg font-bold rounded-xl shadow-lg">Guardar Cambios</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       </div>
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn {
