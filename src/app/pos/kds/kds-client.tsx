@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,7 +11,7 @@ import { Clock, CheckCircle2, ChefHat, Play, Flame, Snowflake, Coffee } from 'lu
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from 'next/navigation';
 
-export default function KDSClient({ orders = [] }: { orders?: Record<string, unknown>[] }) {
+export default function KDSClient({ orders = [] }: { orders?: any[] }) {
   const { toast } = useToast();
   const router = useRouter();
   const [activeOrders, setActiveOrders] = useState(orders);
@@ -38,10 +39,10 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
   const getTimeElapsed = (dateString: string) => Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 60000);
 
   // Filter items logic inside orders based on Tab
-  const filterOrderByZone = (order: Record<string, unknown>, zone: string) => {
+  const filterOrderByZone = (order: any, zone: string) => {
     if (zone === 'Todas') return true;
-    const hasItemsInZone = (order.order_items as Record<string, unknown>[])?.some((item: Record<string, unknown>) => {
-      const cat = Array.isArray(item.products) ? (item.products as Record<string, unknown>[])[0]?.category : (item.products as Record<string, unknown>)?.category;
+    const hasItemsInZone = (order.order_items as any[])?.some((item: any) => {
+      const cat = Array.isArray(item.products) ? (item.products as any[])[0]?.category : (item.products as any)?.category;
       if (zone === 'Barra (Bebidas)' && String(cat).includes('Bebida')) return true;
       if (zone === 'Cocina Caliente' && String(cat).includes('Alimento')) return true;
       if (zone === 'Repostería' && String(cat).includes('Postre')) return true;
@@ -50,10 +51,10 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
     return hasItemsInZone;
   };
 
-  const getFilteredItems = (order: Record<string, unknown>, zone: string) => {
-    if (zone === 'Todas') return (order.order_items as Record<string, unknown>[]) || [];
-    return ((order.order_items as Record<string, unknown>[]) || []).filter((item: Record<string, unknown>) => {
-      const cat = Array.isArray(item.products) ? (item.products as Record<string, unknown>[])[0]?.category : (item.products as Record<string, unknown>)?.category;
+  const getFilteredItems = (order: any, zone: string) => {
+    if (zone === 'Todas') return (order.order_items as any[]) || [];
+    return ((order.order_items as any[]) || []).filter((item: any) => {
+      const cat = Array.isArray(item.products) ? (item.products as any[])[0]?.category : (item.products as any)?.category;
       if (zone === 'Barra (Bebidas)' && String(cat).includes('Bebida')) return true;
       if (zone === 'Cocina Caliente' && String(cat).includes('Alimento')) return true;
       if (zone === 'Repostería' && String(cat).includes('Postre')) return true;
@@ -111,15 +112,15 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
             </div>
           ) : (
             activeOrders.filter(o => filterOrderByZone(o, activeTab)).map((order) => {
-              const minutes = getTimeElapsed(order.created_at);
+              const minutes = getTimeElapsed(String(order.created_at));
               const isWarning = minutes >= 10;
               const isUrgent = minutes >= 15;
-              const isPreparing = order.status === 'preparing';
+              const isPreparing = String(order.status) === 'preparing';
               const itemsToShow = getFilteredItems(order, activeTab);
 
               return (
                 <Card 
-                  key={order.id} 
+                  key={String(order.id)} 
                   className={`w-[350px] shrink-0 flex flex-col border-none shadow-2xl transition-all ${
                     isUrgent ? 'bg-red-950/40 ring-2 ring-red-500' :
                     isWarning ? 'bg-amber-950/30 ring-2 ring-amber-500/50' : 
@@ -130,7 +131,7 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
-                          #{String(order.id).split('-')[0].toUpperCase()}
+                          #{String(String(order.id)).split('-')[0].toUpperCase()}
                         </CardTitle>
                         <p className="text-sm font-medium mt-1 text-slate-400">
                           {isPreparing ? 'En preparación' : 'Nueva Orden'}
@@ -148,7 +149,7 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
                   </CardHeader>
                   <CardContent className="flex-1 overflow-y-auto p-0 scrollbar-hide">
                     <ul className="divide-y divide-slate-700/50">
-                      {itemsToShow.map((item: Record<string, unknown>, i: number) => {
+                      {itemsToShow.map((item: any, i: number) => {
                         const productName = Array.isArray(item.products) ? item.products[0]?.name : item.products?.name;
                         return (
                           <li key={i} className="p-4 hover:bg-white/5 transition-colors group">
@@ -173,7 +174,7 @@ export default function KDSClient({ orders = [] }: { orders?: Record<string, unk
                           ? 'bg-green-600 hover:bg-green-500 text-white' 
                           : 'bg-primary hover:bg-primary/90'
                       }`}
-                      onClick={() => handleUpdateStatus(order.id, order.status)}
+                      onClick={() => handleUpdateStatus(String(order.id), String(order.status))}
                     >
                       {isPreparing ? (
                         <><CheckCircle2 className="w-6 h-6 mr-3" /> Listo en {activeTab}</>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from 'react';
@@ -8,14 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LayoutGrid, Users, CheckCircle2, Clock, Ban } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
-export default function TablesClient({ initialTables = [] }: { initialTables: Record<string, unknown>[] }) {
+export default function TablesClient({ initialTables = [] }: { initialTables: any[] }) {
   const [tables, ] = useState(initialTables);
   
   const { toast } = useToast();
 
   const zones = Array.from(new Set(tables.map(t => t.zone)));
 
-  const handleTableClick = (table: Record<string, unknown>) => {
+  const handleTableClick = (table: any) => {
     toast({
       title: `${table.name}`,
       description: `Capacidad: ${table.capacity} pax | Estado: ${table.status}`,
