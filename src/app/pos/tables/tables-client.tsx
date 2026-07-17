@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function TablesClient({ initialTables = [] }: { initialTables: Record<string, unknown>[] }) {
   const [tables, ] = useState(initialTables);
-  const [activeZone_unused, setActiveZone] = useState('Salón Principal');
+  
   const { toast } = useToast();
 
   const zones = Array.from(new Set(tables.map(t => t.zone)));
@@ -53,7 +53,7 @@ export default function TablesClient({ initialTables = [] }: { initialTables: Re
         </div>
 
         <Card className="border-none shadow-xl shadow-slate-200/40 rounded-3xl bg-white overflow-hidden">
-          <Tabs defaultValue={zones[0] || 'Salón Principal'} className="w-full" onValueChange={setActiveZone}>
+          <Tabs defaultValue={zones[0] || 'Salón Principal'} className="w-full" >
             <div className="border-b border-slate-100 p-4 bg-slate-50">
               <TabsList className="bg-white/50 border border-slate-200">
                 {zones.map(zone => (
