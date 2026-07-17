@@ -7,7 +7,7 @@ import { Utensils } from 'lucide-react'
 
 export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 flex flex-col items-center text-center">
           <div className="bg-primary/10 p-3 rounded-full mb-2">
