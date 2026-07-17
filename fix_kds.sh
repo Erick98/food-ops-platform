@@ -1,0 +1,3 @@
+sed -i 's/const hasItemsInZone = order.order_items?.some((item: Record<string, unknown>) => {/const hasItemsInZone = (order.order_items as Record<string, unknown>[])?.some((item: Record<string, unknown>) => {/g' src/app/pos/kds/kds-client.tsx
+sed -i 's/return (order.order_items || \[\]).filter((item: Record<string, unknown>) => {/return ((order.order_items as Record<string, unknown>[]) || \[\]).filter((item: Record<string, unknown>) => {/g' src/app/pos/kds/kds-client.tsx
+sed -i 's/return order.order_items || \[\];/return (order.order_items as Record<string, unknown>[]) || \[\];/g' src/app/pos/kds/kds-client.tsx
