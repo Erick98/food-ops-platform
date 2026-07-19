@@ -1,46 +1,63 @@
 "use client";
 
 import { ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
-import { Utensils, Target, LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, MonitorPlay, Tag, FileText, Trash2, Wallet, Truck, BookOpen, LayoutGrid, ClipboardList, Receipt, ReceiptText, Calendar, ClipboardCheck, Bike } from 'lucide-react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { Utensils, Target, LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, MonitorPlay, Tag, FileText, Trash2, Wallet, Truck, BookOpen, LayoutGrid, ClipboardList, Receipt, ReceiptText, Calendar, ClipboardCheck, Bike, Building2 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const tenant = searchParams.get('tenant') || 'ito-cafe' // TODO: ContextProvider real
 
   const navItems = [
-    { href: "/pos", icon: <ShoppingCart className="w-5 h-5" />, label: "Punto de Venta" },
-    { href: "/pos/cash-register", icon: <Wallet className="w-5 h-5" />, label: "Turnos / Arqueo" },
-    { href: "/pos/tables", icon: <LayoutGrid className="w-5 h-5" />, label: "Mesas y Zonas" },
-    { href: "/pos/orders", icon: <ClipboardList className="w-5 h-5" />, label: "Órdenes" },
-    { href: "/pos/kds", icon: <MonitorPlay className="w-5 h-5" />, label: "KDS (Cocina)" },
-    { href: "/pos/goals", icon: <Target className="w-5 h-5" />, label: "Metas y KPIs" },
-    { href: "/pos/dashboard", icon: <LayoutDashboard className="w-5 h-5" />, label: "Dashboard" },
-    { href: "/pos/inventory", icon: <Package className="w-5 h-5" />, label: "Inventario" },
-    { href: "/pos/menu", icon: <FileText className="w-5 h-5" />, label: "Catálogo / Menú" },
-    { href: "/pos/suppliers", icon: <Truck className="w-5 h-5" />, label: "Proveedores / OC" },
-    { href: "/pos/recipes", icon: <BookOpen className="w-5 h-5" />, label: "Recetas (BOM)" },
-    { href: "/pos/wastage", icon: <Trash2 className="w-5 h-5" />, label: "Mermas" },
-    { href: "/pos/promotions", icon: <Tag className="w-5 h-5" />, label: "Promociones" },
-    { href: "/pos/invoices", icon: <Receipt className="w-5 h-5" />, label: "Facturación" },
-    { href: "/pos/delivery", icon: <Bike className="w-5 h-5" />, label: "Delivery (Apps)" },
-    { href: "/pos/reports", icon: <FileText className="w-5 h-5" />, label: "Reportes & Sheets" },
-    { href: "/pos/customers", icon: <Users className="w-5 h-5" />, label: "Clientes / CRM" },
-    { href: "/pos/reservations", icon: <Calendar className="w-5 h-5" />, label: "Reservaciones" },
-    { href: "/pos/staff", icon: <Users className="w-5 h-5" />, label: "Personal" },
-    { href: "/pos/payroll", icon: <Wallet className="w-5 h-5" />, label: "Nómina" },
-    { href: "/pos/expenses", icon: <ReceiptText className="w-5 h-5" />, label: "Gastos (OPEX)" },
-    { href: "/pos/checklists", icon: <ClipboardCheck className="w-5 h-5" />, label: "Auditorías" },
-    { href: "/pos/settings", icon: <Settings className="w-5 h-5" />, label: "Configuración" }
+    { href: `/pos?tenant=${tenant}`, icon: <ShoppingCart className="w-5 h-5" />, label: "Punto de Venta" },
+    { href: `/pos/cash-register?tenant=${tenant}`, icon: <Wallet className="w-5 h-5" />, label: "Turnos / Arqueo" },
+    { href: `/pos/tables?tenant=${tenant}`, icon: <LayoutGrid className="w-5 h-5" />, label: "Mesas y Zonas" },
+    { href: `/pos/orders?tenant=${tenant}`, icon: <ClipboardList className="w-5 h-5" />, label: "Órdenes" },
+    { href: `/pos/kds?tenant=${tenant}`, icon: <MonitorPlay className="w-5 h-5" />, label: "KDS (Cocina)" },
+    { href: `/pos/goals?tenant=${tenant}`, icon: <Target className="w-5 h-5" />, label: "Metas y KPIs" },
+    { href: `/pos/dashboard?tenant=${tenant}`, icon: <LayoutDashboard className="w-5 h-5" />, label: "Dashboard" },
+    { href: `/pos/inventory?tenant=${tenant}`, icon: <Package className="w-5 h-5" />, label: "Inventario" },
+    { href: `/pos/menu?tenant=${tenant}`, icon: <FileText className="w-5 h-5" />, label: "Catálogo / Menú" },
+    { href: `/pos/suppliers?tenant=${tenant}`, icon: <Truck className="w-5 h-5" />, label: "Proveedores / OC" },
+    { href: `/pos/recipes?tenant=${tenant}`, icon: <BookOpen className="w-5 h-5" />, label: "Recetas (BOM)" },
+    { href: `/pos/wastage?tenant=${tenant}`, icon: <Trash2 className="w-5 h-5" />, label: "Mermas" },
+    { href: `/pos/promotions?tenant=${tenant}`, icon: <Tag className="w-5 h-5" />, label: "Promociones" },
+    { href: `/pos/invoices?tenant=${tenant}`, icon: <Receipt className="w-5 h-5" />, label: "Facturación" },
+    { href: `/pos/delivery?tenant=${tenant}`, icon: <Bike className="w-5 h-5" />, label: "Delivery (Apps)" },
+    { href: `/pos/reports?tenant=${tenant}`, icon: <FileText className="w-5 h-5" />, label: "Reportes & Sheets" },
+    { href: `/pos/customers?tenant=${tenant}`, icon: <Users className="w-5 h-5" />, label: "Clientes / CRM" },
+    { href: `/pos/reservations?tenant=${tenant}`, icon: <Calendar className="w-5 h-5" />, label: "Reservaciones" },
+    { href: `/pos/staff?tenant=${tenant}`, icon: <Users className="w-5 h-5" />, label: "Personal" },
+    { href: `/pos/payroll?tenant=${tenant}`, icon: <Wallet className="w-5 h-5" />, label: "Nómina" },
+    { href: `/pos/expenses?tenant=${tenant}`, icon: <ReceiptText className="w-5 h-5" />, label: "Gastos (OPEX)" },
+    { href: `/pos/checklists?tenant=${tenant}`, icon: <ClipboardCheck className="w-5 h-5" />, label: "Auditorías" },
+    { href: `/pos/settings?tenant=${tenant}`, icon: <Settings className="w-5 h-5" />, label: "Configuración" }
   ]
+
+  // Limpiamos el pathname para la comparación (por si tiene query params)
+  const isPathActive = (href: string) => {
+    const baseHref = href.split('?')[0]
+    return pathname === baseHref
+  }
 
   return (
     <aside className="w-20 lg:w-64 bg-card border-r flex flex-col items-center lg:items-stretch py-4 shrink-0 shadow-sm z-10">
-      <div className="flex items-center justify-center lg:justify-start lg:px-6 mb-6 gap-3 shrink-0">
-        <div className="bg-primary text-primary-foreground p-2 rounded-lg shadow-sm">
-          <Utensils className="w-5 h-5" />
+      <div className="flex flex-col gap-4 px-2 lg:px-4 mb-6 shrink-0">
+        <Link href="/holding" className="flex items-center justify-center lg:justify-start gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+          <Building2 className="w-4 h-4" />
+          <span className="hidden lg:block">Volver al Holding</span>
+        </Link>
+        <div className="flex items-center justify-center lg:justify-start gap-3">
+          <div className="bg-primary text-primary-foreground p-2 rounded-lg shadow-sm">
+            <Utensils className="w-5 h-5" />
+          </div>
+          <div className="hidden lg:block">
+            <span className="font-bold text-lg tracking-tight block leading-tight">Food-Ops</span>
+            <span className="text-xs text-primary font-medium">{tenant === 'ito-cafe' ? 'Ito Café' : 'Garnachaland'}</span>
+          </div>
         </div>
-        <span className="font-bold text-lg hidden lg:block tracking-tight">Food-Ops</span>
       </div>
       
       <div className="flex-1 overflow-y-auto w-full px-2 lg:px-4 scrollbar-thin scrollbar-thumb-muted-foreground/20">
@@ -51,7 +68,7 @@ export default function Sidebar() {
               href={item.href} 
               icon={item.icon} 
               label={item.label} 
-              active={pathname === item.href} 
+              active={isPathActive(item.href)} 
             />
           ))}
         </nav>

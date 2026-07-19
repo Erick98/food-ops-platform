@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
 export default function Home() {
-  redirect('/pos')
+  // Redirigir a la vista de Holding (Corporativo) por defecto en lugar de /pos
+  redirect('/holding')
 }

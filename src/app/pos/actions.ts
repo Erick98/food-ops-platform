@@ -3,6 +3,9 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { recordLedgerEntry, getAccountByName } from "@/lib/ledger"
+import { v4 as uuidv4 } from "uuid"
+
 
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
@@ -247,26 +250,26 @@ export async function createOrder(
   try {
     const supabase = createClient()
 
-    // Get current user profile to associate order
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'No autenticado' }
+    if (!user) return { success: false, error: "No autenticado" }
 
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('id, tenant_id')
-      .eq('id', user.id)
+      .from("profiles")
+      .select("id, tenant_id")
+      .eq("id", user.id)
       .single()
 
-    if (!profile) return { success: false, error: 'Perfil no encontrado' }
+    if (!profile) return { success: false, error: "Perfil no encontrado" }
 
-    // Insert the order
+    const idempotencyKey = uuidv4()
+
     const { data: order, error: orderError } = await supabase
-      .from('orders')
+      .from("orders")
       .insert({
         tenant_id: profile.tenant_id,
         profile_id: profile.id,
         total_amount: totalAmount,
-        status: 'pending',
+        status: "completed",
         payment_method: paymentMethod,
         table_id: tableId || null,
       })
@@ -274,11 +277,10 @@ export async function createOrder(
       .single()
 
     if (orderError || !order) {
-      console.error('Order insert error:', orderError)
+      console.error("Order insert error:", orderError)
       return { success: false, error: orderError?.message }
     }
 
-    // Insert order items
     const orderItems = cartItems.map(item => ({
       order_id: order.id,
       product_id: item.id,
@@ -287,27 +289,46 @@ export async function createOrder(
       subtotal: item.price * item.quantity,
     }))
 
-    const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
+    const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
     if (itemsError) {
-      console.error('Order items insert error:', itemsError)
+      console.error("Order items insert error:", itemsError)
       return { success: false, error: itemsError.message }
     }
 
-    // Mark table as occupied if a table was selected
-    if (tableId) {
-      await supabase
-        .from('tables')
-        .update({ status: 'occupied', current_order_id: order.id })
-        .eq('id', tableId)
+    const revenueAccount = await getAccountByName(profile.tenant_id, "Ingresos por Ventas")
+    let destAccountName = "Caja Fija"
+    if (paymentMethod === "card") destAccountName = "Bancos"
+    else if (paymentMethod === "transfer") destAccountName = "Bancos"
+    
+    const destAccount = await getAccountByName(profile.tenant_id, destAccountName)
+
+    if (revenueAccount && destAccount) {
+      await recordLedgerEntry({
+        tenantId: profile.tenant_id,
+        transactionRef: order.id,
+        transactionType: "sale",
+        idempotencyKey: `ledger_sale_${idempotencyKey}`,
+        description: `Venta POS (${paymentMethod})`,
+        lines: [
+          { accountId: destAccount, debit: totalAmount, credit: 0 },
+          { accountId: revenueAccount, debit: 0, credit: totalAmount }
+        ]
+      })
     }
 
-    revalidatePath('/pos/tables')
-    revalidatePath('/pos')
+    if (tableId) {
+      await supabase
+        .from("tables")
+        .update({ status: "occupied", current_order_id: order.id })
+        .eq("id", tableId)
+    }
+
+    revalidatePath("/pos/tables")
+    revalidatePath("/pos")
     return { success: true, orderId: order.id }
   } catch (e) {
-    console.error('createOrder exception:', e)
-    // Fallback — still show success to cashier; order is logged to console
-    return { success: true, orderId: 'local-' + Date.now() }
+    console.error("createOrder exception:", e)
+    return { success: true, orderId: "local-" + Date.now() }
   }
 }
 
@@ -425,25 +446,26 @@ export async function getDailyCutoff(date?: string) {
 }
 
 // ─── CASH SHIFTS (ARQUEO DE CAJA) ─────────────────────────────────────────────
+
 export async function getActiveShift() {
   try {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { data: null, error: 'No auth' }
+    if (!user) return { data: null, error: "No auth" }
 
-    const { data: profile } = await supabase.from('profiles').select('tenant_id').eq('id', user.id).single()
-    if (!profile) return { data: null, error: 'No profile' }
+    const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).single()
+    if (!profile) return { data: null, error: "No profile" }
 
     const { data, error } = await supabase
-      .from('cash_shifts')
-      .select('id, opened_at, starting_cash, status, opened_by (full_name)')
-      .eq('tenant_id', profile.tenant_id)
-      .eq('status', 'open')
-      .order('opened_at', { ascending: false })
+      .from("shifts")
+      .select("id, opened_at, opening_cash, status, opened_by")
+      .eq("tenant_id", profile.tenant_id)
+      .eq("status", "open")
+      .order("opened_at", { ascending: false })
       .limit(1)
       .single()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error && error.code !== "PGRST116") throw error
     return { data: data || null, error: null }
   } catch (e) {
     return { data: null, error: e instanceof Error ? e.message : String(e) }
@@ -454,20 +476,46 @@ export async function openShift(startingCash: number) {
   try {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'No auth' }
+    if (!user) return { success: false, error: "No auth" }
 
-    const { data: profile } = await supabase.from('profiles').select('id, tenant_id').eq('id', user.id).single()
-    if (!profile) return { success: false, error: 'No profile' }
+    const { data: profile } = await supabase.from("profiles").select("id, tenant_id").eq("id", user.id).single()
+    if (!profile) return { success: false, error: "No profile" }
 
-    const { error } = await supabase
-      .from('cash_shifts')
+    const idempotencyKey = uuidv4()
+
+    const { data: shift, error } = await supabase
+      .from("shifts")
       .insert([{
         tenant_id: profile.tenant_id,
         opened_by: profile.id,
-        starting_cash: startingCash
+        opening_cash: startingCash,
+        idempotency_key: idempotencyKey,
+        status: "open"
       }])
+      .select("id")
+      .single()
 
     if (error) throw error
+
+    // ARKAX Ledger Integration (Apertura de turno)
+    const cashAccount = await getAccountByName(profile.tenant_id, "Caja Fija")
+    const safeAccount = await getAccountByName(profile.tenant_id, "Fondo de Apertura")
+    
+    if (cashAccount && safeAccount && shift) {
+      await recordLedgerEntry({
+        tenantId: profile.tenant_id,
+        transactionRef: shift.id,
+        transactionType: "shift_open",
+        idempotencyKey: `ledger_shift_open_${idempotencyKey}`,
+        description: `Apertura de turno (Fondo inicial: $${startingCash})`,
+        lines: [
+          { accountId: cashAccount, debit: startingCash, credit: 0 },
+          { accountId: safeAccount, debit: 0, credit: startingCash }
+        ]
+      })
+    }
+
+    revalidatePath("/pos/cash-register")
     return { success: true }
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : String(e) }
@@ -478,26 +526,62 @@ export async function closeShift(shiftId: string, actualCash: number, expectedCa
   try {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'No auth' }
+    if (!user) return { success: false, error: "No auth" }
 
-    const { data: profile } = await supabase.from('profiles').select('id, tenant_id').eq('id', user.id).single()
-    if (!profile) return { success: false, error: 'No profile' }
+    const { data: profile } = await supabase.from("profiles").select("id, tenant_id").eq("id", user.id).single()
+    if (!profile) return { success: false, error: "No profile" }
+    
+    // Obtener datos del turno
+    const { data: shiftData } = await supabase.from("shifts").select("opening_cash, idempotency_key").eq("id", shiftId).single()
+    const idempotencyKey = shiftData?.idempotency_key || uuidv4()
 
     const { error } = await supabase
-      .from('cash_shifts')
+      .from("shifts")
       .update({
         closed_by: profile.id,
         closed_at: new Date().toISOString(),
-        actual_cash: actualCash,
-        expected_cash: expectedCash,
-        difference: actualCash - expectedCash,
-        notes,
-        status: 'closed'
+        closing_cash: actualCash,
+        notes: `Esperado: ${expectedCash} | Notas: ${notes}`,
+        status: "closed"
       })
-      .eq('id', shiftId)
-      .eq('tenant_id', profile.tenant_id)
+      .eq("id", shiftId)
+      .eq("tenant_id", profile.tenant_id)
 
     if (error) throw error
+
+    // ARKAX Ledger Integration (Cierre de turno)
+    const cashAccount = await getAccountByName(profile.tenant_id, "Caja Fija")
+    const safeAccount = await getAccountByName(profile.tenant_id, "Fondo de Apertura")
+    const discrepancyAccount = await getAccountByName(profile.tenant_id, "Diferencias de Caja")
+    
+    if (cashAccount && safeAccount) {
+      const lines = [
+        { accountId: safeAccount, debit: actualCash, credit: 0 },
+        { accountId: cashAccount, debit: 0, credit: actualCash }
+      ]
+      
+      const difference = actualCash - expectedCash
+      if (difference !== 0 && discrepancyAccount) {
+        if (difference < 0) {
+          lines.push({ accountId: discrepancyAccount, debit: Math.abs(difference), credit: 0 })
+          lines.push({ accountId: safeAccount, debit: 0, credit: Math.abs(difference) })
+        } else {
+          lines.push({ accountId: discrepancyAccount, debit: 0, credit: difference })
+          lines.push({ accountId: safeAccount, debit: difference, credit: 0 })
+        }
+      }
+      
+      await recordLedgerEntry({
+        tenantId: profile.tenant_id,
+        transactionRef: shiftId,
+        transactionType: "shift_close",
+        idempotencyKey: `ledger_shift_close_${idempotencyKey}`,
+        description: `Cierre de turno. Esperado: $${expectedCash}, Real: $${actualCash}`,
+        lines
+      })
+    }
+
+    revalidatePath("/pos/cash-register")
     return { success: true }
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : String(e) }
