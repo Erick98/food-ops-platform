@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link"
 import { Building2, TrendingUp, Store, ChevronRight, BrainCircuit } from "lucide-react"
